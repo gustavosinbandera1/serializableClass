@@ -38,12 +38,14 @@ public:
          //std::cout <<"address: "<< static_cast<const void*>(dataOut)<<std::endl; 
     }
     virtual void deserialize(const char* dataIn)
-    {   //dataIn = dataIn + 7;
-        //std::cout<<"DATA:"<<*(int*)dataIn<<std::endl;
+    {   
         dataIn = SerializablePOD<char*>::deserialize(dataIn, name);
-        // dataIn = SerializablePOD<int>::deserialize(dataIn, age);
-        //dataIn = SerializablePOD<float>::deserialize(dataIn, weight); 
-        //dataIn = SerializablePOD<double>::deserialize(dataIn, money); 
+        std::cout<<"dato deserializado en el metodo------------>"<<*(int*)dataIn<<std::endl;
+        dataIn = SerializablePOD<int>::deserialize(dataIn, age);
+        std::cout<<"dato deserializado en el metodo------------>"<<*(float*)dataIn<<std::endl;
+        dataIn = SerializablePOD<float>::deserialize(dataIn, weight); 
+        std::cout<<"dato deserializado en el metodo------------>"<<*(double*)dataIn<<std::endl;
+        dataIn = SerializablePOD<double>::deserialize(dataIn, money); 
     } 
 
     int getAge()
