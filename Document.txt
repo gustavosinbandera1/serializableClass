@@ -1,0 +1,110 @@
+An overview of data serialization techniques in C++
+
+A)............ Full memcpy
+
+One of the old-school C techniques consists in performing a memcpy kind of serialization. 
+It’s pretty low-level and works very well in some specific circumstances. 
+It’s still widely used for sending and receiving basic structs via UDP packets and TCP datagrams.  
+The basic skeleton looks like:
+
+memcpy(data, &your_struct, sizeof(YourStruct))); // "Serialize"
+memcpy(&your_struct, data, sizeof(YourStruct))); // "Deserialize"
+
+
+So as to show a real life example, 
+let me take a modified code snippet from a project I used to work in, 
+EQEmulator:
+
+// -------------------------------------------------
+// The structure we will be working with.
+struct PlayerProfile_Struct //23576 Octets
+{
+/*00000*/ uint32 checksum;
+/*00004*/ uint32 gender; // Player Gender - 0 Male, 1 Female
+/*00008*/ uint32 race; // Player race
+/*00012*/ uint32 class_; // Player class
+/*00016*/ uint8 level; // Level of player
+/*00017*/ uint8 unknown00022[102]; // ***Placeholder
+/*00119*/ uint32 deity; // deity
+/*00123*/ uint32 intoxication; // Alcohol level (in ticks till sober?)
+...
+};
+ 
+// -------------------------------------------------
+// We have an incoming UDP packet. Let's process it.
+switch (incomingPacket.opcode) {
+    case PLAYER_PROFILE: {
+        PlayerProfile_Struct playerProfile;
+        memcpy(&playerProfile, incomingPacket.data, sizeof(PlayerProfile_Struct)); // Fill the structure with the incoming data.
+        if (playerProfile.intoxication > 50) { // Our data should be valid, checksum was already checked.
+            std::cout << "I hope you are not driving";
+        }
+        break;
+    }
+}
+ 
+// -------------------------------------------------
+// Let's send a packet to the server.
+char *data = new char[sizeof(PlayerProfile_Struct)];
+memcpy((void*)data, (void*)&myPlayerProfile, sizeof(PlayerProfile_Struct));
+Packet outgoingPacket(PLAYER_PROFILE, data, sizeof(PlayerProfile_Struct));
+networkManager.synchronousSend(outgoingPacket);
+delete []data;
+ 
+// -------------------------------------------------
+This fragment of code is used to send and receive instances of PlayerProfile, 
+a basic structure used in many games to describe the information about a player.
+
+And now the paragraph you were waiting for: “Where is the problem?” 
+Basically it only works out-of-the-box with Plain Old Data (POD) structures, 
+which do rarely happen nowadays. As soon as you have pointers or complex types, you’re out of luck, 
+as they sizes are many times determined in run time. So let’s keep moving.
+
+
+B)...................... Manual approach
+
+Doing things manually always work. 
+Well, that’s it if you took enough sleep, coffee and you are also god. 
+Let’s modify our struct:
+
+struct PlayerProfile_Struct
+{
+/*00000*/ uint32 checksum;
+/*00004*/ uint32 gender;
+/*00008*/ char *name;
+};
+
+Oh, wait. What happened here? Our sizeof(PlayerProfile_Struct) will (normally) return 12 bytes: 8 for the integers, 4 for the char pointer.  
+Our name is a pointer and not the string itself; 
+therefore, the previous memcpy approach wouldn’t work so well here, as we don’t know in compile time the final size of the data.
+
+So as to serialize this structure, we can choose between several methods. 
+I will list a few that come to mind:
+
+1*  Several memcpy. 
+    We can use one single memcpy to copy the first two fields, 
+    and a second memcpy with an offset for the name using its string length instead of size. Something like this: 
+
+    const uint32 size = 2 * sizeof(uint32) + (strlen(myPlayerProfile.name) + 1);    // Add one byte for the ending 0 of the string.
+    char *target = new char[size];
+    memcpy(target, (void*)&myPlayerProfile, 2 * sizeof(uint32));
+    memcpy(target + 2 * sizeof(uint32), myPlayerProfile.name, strlen(myPlayerProfile.name) + 1);
+
+2*  Using string separators. 
+    We can convert every field to a string and then mix all together into a single one by using a certain character as a separator. 
+    Be careful: the name field must not contain that character. 
+
+    // Serialize.
+    std::string output = std::to_string(myPlayerProfile.checksum) + "|" + std::to_string(myPlayerProfile.gender) + "|" + std::string(myPlayerProfile.name);
+ 
+// Deserialize.
+#include <boost/algorithm/string.hpp>
+ 
+std::vector<std::string> fields; // Output fields.
+boost::split(fields, output, boost::is_any_of("|")); // Separate the input string into our fields using the delimiter.
+ 
+myPlayerProfile.checksum = std::stoi(fields.at(0)); // Checksum: Cast from String to integer
+myPlayerProfile.gender = std::stoi(fields.at(1)); // Gender: Cast from String to integer
+myPlayerProfile.name = new char[fields.at(2).length()]; // Alloc memory for our C-style strings.
+strcpy(myPlayerProfile.name, fields.at(2).c_str()); // Copy it.
+

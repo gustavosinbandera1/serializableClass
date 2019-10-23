@@ -1,0 +1,139 @@
+#include <stdio.h>
+#include <string.h>
+
+
+class Serializable
+{
+public:
+    virtual size_t serialize_size() const = 0;
+    virtual void serialize(char* dataOut) const = 0;
+    virtual void deserialize(const char* dataIn) = 0;
+};
+
+// Load / save manager
+class EEPromManager
+{
+public:
+    void save( const Serializable& s )
+    {
+        char * data;
+        size_t data_len;
+        reserve_memory( data, data_len, s );
+        s.serialize( data );
+        //EEPROM::Save( data , data_len );
+        delete [] data;
+    }
+
+    void load( Serializable& s )
+    {
+        char * data;
+        size_t data_len;
+        reserve_memory( data, data_len, s );
+        //EEPROM::Load( data, data_len );
+        s.deserialize( data );
+        delete [] data;
+    }
+
+private:
+    char* reserve_memory( char*& data, size_t& data_len, const Serializable& s )
+    {
+        return new char[ s.serialize_size() ];
+    }
+};
+
+
+template <typename POD>
+class SerializablePOD
+{
+public:
+    static size_t serialize_size(POD str)
+    {
+        return sizeof(POD);
+    }
+    static char* serialize( char* target, POD value )
+    {
+        return memcpy( target, &value, serialize_size(value) );
+    }
+
+    static const char* deserialize( const char* source, POD& target )
+    {
+        memcpy( &target, source, serialize_size(target) );
+        return source + serialize_size(target);
+    }
+};
+
+template<>
+size_t SerializablePOD<char*>::serialize_size(char* str)
+{
+    return sizeof(size_t) + strlen(str);
+}
+
+template<>
+const char* SerializablePOD<char*>::deserialize( const char* source, char*& target )
+{
+    size_t length;
+    memcpy( &length, source, sizeof(size_t) );
+    memcpy( &target, source + sizeof(size_t), length );
+    return source + sizeof(size_t) + length;
+}
+
+
+
+
+class Person : public Serializable
+{
+public:
+    virtual size_t serialize_size() const
+    {
+        return SerializablePOD<char*>::serialize_size(name) +
+               SerializablePOD<int>::serialize_size(age) +
+               SerializablePOD<float>::serialize_size(weight);
+    }
+
+    virtual void serialize(char* dataOut) const
+    {
+        dataOut = SerializablePOD<char*>::serialize(dataOut, name);
+        dataOut = SerializablePOD<int>::serialize(dataOut, age);
+        dataOut = SerializablePOD<float>::serialize(dataOut, weight);
+    }
+    virtual void deserialize(const char* dataIn)
+    {
+        dataIn = SerializablePOD<char*>::deserialize(dataIn, name);
+        dataIn = SerializablePOD<int>::deserialize(dataIn, age);
+        dataIn = SerializablePOD<float>::deserialize(dataIn, weight);
+    }
+
+private:
+    char* name;
+    int   age;
+    float weight;
+};
+
+
+
+
+/*template <class identificador> definición_de_función;
+template <typename identificador> definición_de_función;*/
+
+
+
+
+
+/*
+Each class you intend to serialize / de-serialize should inherit from an interface which mandates the virtual interface for these functions. 
+Note that you'll need to do your own memory management here. 
+I've given a simple example but you'd probably want something a bit more robust.
+
+Then each function should sequentially serialize all attributes of the class 
+(chaining bases classes and calling serialize on aggregate objects if needed.)
+*/
+
+
+
+
+
+int main()
+{
+
+   return 0;
+}
