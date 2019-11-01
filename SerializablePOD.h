@@ -54,7 +54,7 @@ const char* SerializablePOD<char*>::deserialize( const char* source, char*& targ
 template<>
 char* SerializablePOD<char*>::serialize( char* target, char* value )
 {  
-
+    
     size_t l = strlen(value);
     std::cout <<": ---------->"<< static_cast<const void*>(target)<<std::endl;
     std::cout<<"vamos a serializar char*->"<<l<<std::endl;
