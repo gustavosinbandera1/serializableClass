@@ -37,61 +37,8 @@ int main (void) {
      wifi_dto.printData();
     wifi_dto.deserialize(buffer);
  
-   wifi_dto.printData();
+  // wifi_dto.printData();
     return 0;
 }
   
 
-
-/* 
-int main() {
-
-
-char array[10]= "gustavo";
-Persona miPersona(array,32,45.65,5400);
-size_t length =  miPersona.serialize_size(); //get the complete  size of the Class' attributes 
-
-<<<<<<< HEAD
-char* buffer;
-buffer  = (char*)malloc(sizeof(char)*length);
-
-miPersona.serialize(buffer);
-// size_t len = *(size_t*)buffer;
-// std::cout<<"------------------------------------------------------------"<<std::endl;
-// std::cout <<"address(l): "<< static_cast<const void*>(buffer)<<std::endl;
-// std::cout<<"el buffer "<<len<<std::endl;//length
-// buffer = buffer + sizeof(size_t);
-// std::cout <<"address(char*): "<< static_cast<const void*>(buffer)<<std::endl;
-// std::cout<<"salida2------>"<<buffer<<std::endl;//name
-// buffer = buffer + len ;
-// std::cout <<"address(int): "<< static_cast<const void*>(buffer)<<std::endl;
-// std::cout<<"salida 3------>"<<*(int*)buffer<<std::endl; //age
-// buffer = buffer + sizeof(int);
-// std::cout <<"address(float): "<< static_cast<const void*>(buffer)<<std::endl;
-// std::cout<<"salida4---->"<<*(float*)buffer<<std::endl;
-// buffer = buffer + sizeof(float);
-// std::cout <<"address(double): "<< static_cast<const void*>(buffer)<<std::endl;
-// std::cout<<"salida4---->"<<*(double*)buffer<<std::endl; 
-
-char nameTest[] = "carlos";
-miPersona.setMoney(12000);
-miPersona.setWeight(68.8);
-miPersona.setAge(38);
-miPersona.printData();
-miPersona.change_name(nameTest);
-=======
-char* buffer; //buffer to save the serialized data
-buffer  = (char*)malloc(sizeof(char)*length);
-
-miPersona.serialize(buffer); //serialize data 
-std::cout<<"------------------------------------------------------------"<<std::endl;
-miPersona.deserialize(buffer); //restore the data 
-
-
-free(buffer);
->>>>>>> 5409b6d3efd72f60055c1432c0276ee7530148e2
-
-miPersona.deserialize(buffer);
-miPersona.printData();
-    return 0;
-}   */
