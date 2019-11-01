@@ -1,4 +1,5 @@
-
+#ifndef SERIALIZABLE_H
+#define SERIALIZABLE_H
 // Interface class
 class Serializable
 {
@@ -8,3 +9,4 @@ public:
     virtual void deserialize(const char* dataIn) = 0;
 };
 
+#endif

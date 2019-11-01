@@ -1,6 +1,6 @@
+#include "Serializable.h"
 #include <stdio.h>
 #include <string.h>
-#include "Serializable.h"
 #include "SerializablePOD.h"
 
 
@@ -41,9 +41,9 @@ public:
     {   //dataIn = dataIn + 7;
         //std::cout<<"DATA:"<<*(int*)dataIn<<std::endl;
         dataIn = SerializablePOD<char*>::deserialize(dataIn, name);
-        // dataIn = SerializablePOD<int>::deserialize(dataIn, age);
-        //dataIn = SerializablePOD<float>::deserialize(dataIn, weight); 
-        //dataIn = SerializablePOD<double>::deserialize(dataIn, money); 
+        dataIn = SerializablePOD<int>::deserialize(dataIn, age);
+        dataIn = SerializablePOD<float>::deserialize(dataIn, weight); 
+        dataIn = SerializablePOD<double>::deserialize(dataIn, money); 
     } 
 
     int getAge()
@@ -57,6 +57,27 @@ public:
     double getMoney()
     {
         return money;
+    }
+    void change_name(char* name_) {
+        name = name_;
+    }
+
+    void setMoney(double money_) {
+        money = money_;
+    }
+    void setWeight(float peso){
+        weight = peso;
+    }
+    void setAge(int edad) {
+        age = edad;
+    }
+
+    void printData(void) {
+        std::cout <<"--------------------------------------------------------"<< std::endl;
+        std::cout <<"Name: " << name <<std::endl;
+        std::cout <<"Money: " << money << std::endl;
+        std::cout <<"Weight: " << weight << std::endl;
+        std::cout <<"Age: " << age << std::endl;
     }
 private:
     char *name;
