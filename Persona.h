@@ -22,28 +22,22 @@ public:
 
     virtual void serialize(char* dataOut) const
     {
-         std::cout <<"address: String"<< static_cast<const void*>(dataOut)<<std::endl;
-         dataOut = SerializablePOD<char*>::serialize(dataOut, name);
-         dataOut = dataOut + strlen(name);
-         std::cout <<"address(INT): "<< static_cast<const void*>(dataOut)<<std::endl;
-         SerializablePOD<int>::serialize(dataOut, age);
-         std::cout<<"address(INT-DATA):"<<*(int*)dataOut<<std::endl;
-         dataOut += sizeof(int);
-         std::cout <<"address: (float)"<< static_cast<const void*>(dataOut)<<std::endl;
-         SerializablePOD<float>::serialize(dataOut, weight);
-         dataOut +=sizeof(float);
-         std::cout <<"address: (DOUBLE) "<< static_cast<const void*>(dataOut)<<std::endl;
-         SerializablePOD<double>::serialize(dataOut, money);
-         dataOut += sizeof(double);
-         //std::cout <<"address: "<< static_cast<const void*>(dataOut)<<std::endl; 
+        std::cout <<"address: String"<< static_cast<const void*>(dataOut)<<std::endl;
+        dataOut = SerializablePOD<char*>::serialize(dataOut, name);
+        std::cout <<"address(INT): "<< static_cast<const void*>(dataOut)<<std::endl;
+        dataOut = SerializablePOD<int>::serialize(dataOut, age);
+        std::cout<<"address(INT-DATA):"<<*(int*)dataOut<<std::endl;
+        std::cout <<"address: (float)"<< static_cast<const void*>(dataOut)<<std::endl;
+        dataOut = SerializablePOD<float>::serialize(dataOut, weight);
+        std::cout <<"address: (DOUBLE) "<< static_cast<const void*>(dataOut)<<std::endl;
+        dataOut = SerializablePOD<double>::serialize(dataOut, money);
     }
     virtual void deserialize(const char* dataIn)
-    {   //dataIn = dataIn + 7;
-        //std::cout<<"DATA:"<<*(int*)dataIn<<std::endl;
+    {   
         dataIn = SerializablePOD<char*>::deserialize(dataIn, name);
         dataIn = SerializablePOD<int>::deserialize(dataIn, age);
         dataIn = SerializablePOD<float>::deserialize(dataIn, weight); 
-        dataIn = SerializablePOD<double>::deserialize(dataIn, money); 
+
     } 
 
     int getAge()
